@@ -11,12 +11,14 @@ import os
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
+import theversion
+
 setup(
     name='theversion',
-    version='0.0.0',
+    version=theversion.__version__,
     author='Eric Dill',
     description="Making versioning easy",
-    long_description=read('README.md'),
+    long_description=read('README.rst'),
     pymodules=['theversion'],
     url='http://github.com/ericdill/theversion',
     license='GPL-3',

@@ -27,6 +27,12 @@ Aaaaand that's it! ::
 
     python -c "import package_name; print(package_name.__version__)"
 
+For example, look at the ``setup.py`` and ``theversion.py`` of this project for
+guidance in setting up your own project! ::
+
+    $ python -c "import theversion; print(theversion.__version__)"
+    v0.0.2.post6+g32c6562
+
 Configuring ``theversion``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 There are a few configuration options that you can provide to the `version`
