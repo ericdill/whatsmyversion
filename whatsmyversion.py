@@ -105,8 +105,36 @@ def version_in_folder_name(path):
         version_info_folder = split_path[split_path.index('site-packages')+1]
         logger.debug('version_info_folder = %s' % version_info_folder)
         split_version_info = version_info_folder.split('-')
+        if len(split_version_info) == 1:
+            # there is no relevant metadata in the site-package folder tree
+            # though there might be an egg-info file or folder
+            site_packages_dir = os.sep + os.path.join(*split_path[:(split_path.index('site-packages')+1)])
+            logger.debug('site_packages_dir = %s' % site_packages_dir)
+            # for path in os.listdir(site_packages_dir):
+            #     if version_info_folder in path:
+            #         logger.debug('path matched = %s' % path)
+            egg_info_path = [path for path in os.listdir(site_packages_dir) if
+                        (version_info_folder.lower() in path.lower() and
+                         '.egg-info' in path.lower())][0]
+            egg_info_path = os.path.join(site_packages_dir, egg_info_path)
+            print("egg_info path = %s" % egg_info_path)
+            if os.path.isdir(egg_info_path):
+                logger.debug('egg_info_path is a directory. contents = %s' % os.listdir(egg_info_path))
+                egg_info_path = os.path.join(egg_info_path, 'PKG-INFO')
+            elif os.path.isfile(egg_info_path):
+                logger.debug('egg_info_path is a file')
+            
+            # find the version from the egg info
+            with open(egg_info_path) as f:
+                lines = f.read().split('\n')
+                version_line = [line for line in lines if line.lower().startswith('version')][0]
+                version = version_line.split(':')[-1].strip()
+                logger.debug('version_line = %s' % version_line)
+                logger.debug('version = %s' % version)
+                return version
+        
         logger.debug('split_version_info = %s' % split_version_info)
-        version = split_version_info[1]
+        return split_version_info[1]
         # package_name = split_version_info[0]
         # logger.debug('\n\n\npackage_name = %s\n\n\n' % package_name)
         # idx = len(split_version_info) - 1
