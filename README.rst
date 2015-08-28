@@ -1,18 +1,18 @@
-``theversion``
+``whatsmyversion``
 --------------
 Single module python package to make versioning simple.  You add a couple of
-configuration parameters to your top-most python module and ``theversion`` will
+configuration parameters to your top-most python module and ``whatsmyversion`` will
 determine the version string based on your git history.
 
-Using ``theversion``
+Using ``whatsmyversion``
 ~~~~~~~~~~~~~~~~~~~~
 
 Add the following to the top level of your package (package_name/__init__.py
 or single_module_package.py) ::
 
-    import theversion
-    __version__ = theversion.version(__file__)
-    del theversion
+    import whatsmyversion
+    __version__ = whatsmyversion.version(__file__)
+    del whatsmyversion
 
 Add the following to your setup.py ::
 
@@ -27,13 +27,13 @@ Aaaaand that's it! ::
 
     python -c "import package_name; print(package_name.__version__)"
 
-For example, look at the ``setup.py`` and ``theversion.py`` of this project for
+For example, look at the ``setup.py`` and ``whatsmyversion.py`` of this project for
 guidance in setting up your own project! ::
 
-    $ python -c "import theversion; print(theversion.__version__)"
+    $ python -c "import whatsmyversion; print(whatsmyversion.__version__)"
     v0.0.2.post6+g32c6562
 
-Configuring ``theversion``
+Configuring ``whatsmyversion``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 There are a few configuration options that you can provide to the `version`
 function. These are:
