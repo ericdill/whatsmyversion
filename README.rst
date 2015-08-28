@@ -24,7 +24,20 @@ Add the following to your setup.py
 
 Aaaaand that's it!
 
+Configuring `theversion`
+~~~~~~~~~~~~~~~~~~~~~~~~
+There are a few configuration options that you can provide to the `version`
+function. These are:
 
+`version_prefix` which is defaults to `v`
+
+`version_suffix` which is one of `a`, `b`, `rc`, `.post`, `.dev` and defaults to `.post`
+
+`use_local_version_id` which is a boolean flag to include (True) or not (False)
+the git hash and defaults to `True` because information is power
+
+These three configuration options combine to produce a PEP440 compliant
+version string. `PEP440 <https://www.python.org/dev/peps/pep-0440/>`_
 
 Use cases
 ~~~~~~~~~

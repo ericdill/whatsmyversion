@@ -6,9 +6,8 @@ logger = logging.getLogger(__name__)
 
 git_describe_cmd = ['git', 'describe', '--dirty', '--long', '--always', '--tags']
 
+# need to convert this into a validating regex
 pep440 = r'[N!]N(.N)*[{a|b|rc}N][.postN][.devN]'
-
-
 
 def git_describe(git_root, version_prefix, version_suffix, use_local_version_id=False):
     desc = subprocess.check_output(git_describe_cmd, cwd=git_root).strip()
