@@ -11,15 +11,14 @@ def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
 import theversion
-version = theversion.__version__
 
 setup(
     name='theversion',
-    version=version,
+    version=theversion.__version__,
     author='Eric Dill',
     description="Making versioning easy",
     long_description=read('README.rst'),
-    pymodules=['theversion'],
+    py_modules=['theversion'],
     url='http://github.com/ericdill/theversion',
     license='GPLv3',
     classifiers = [

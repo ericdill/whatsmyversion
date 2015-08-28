@@ -39,11 +39,11 @@ def git_describe(git_root, version_prefix, version_suffix, use_local_version_id=
         version = prefix + version_suffix + suffix
     else:
         version = prefix
-    # add the local identifier to the version (the first bit of the git hash)
+    # add the local identifier (the first bit of the git hash) to the version
     if use_local_version_id:
         # PEP440 formatting of the local identifier
-        version += '+' + local_id + '-' + dirty
-    elif dirty:
+        version += '+' + local_id
+    if dirty:
         # if you're building from uncommitted repos, shame on you...
         version += '+' + dirty
 
@@ -105,6 +105,7 @@ def version_in_folder_name(path):
             raise RuntimeError("It is not clear why the version string is not "
                                "a one-element list at this point = %s" % version)
         version = version[0]
+        version.replace('_', '+')
         return version
 
 
