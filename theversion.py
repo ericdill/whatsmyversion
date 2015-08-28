@@ -1,5 +1,8 @@
 import subprocess
 import os
+import logging
+
+logger = logging.getLogger(__name__)
 
 git_describe_cmd = ['git', 'describe', '--dirty', '--long', '--always', '--tags']
 
@@ -61,15 +64,30 @@ def version_in_folder_name(path):
         # the thing that comes after the 'site-packages' folder
         split_path = path.split(os.sep)
         version_info_folder = split_path[split_path.index('site-packages')+1]
-        print('version_info_folder = %s' % version_info_folder)
+        logger.debug('version_info_folder = %s' % version_info_folder)
+        split_version_info = version_info_folder.split('-')
+        logger.debug('split_version_info = %s' % split_version_info)
+        package_name = split_version_info[0]
+        idx = len(split_version_info) - 1
+        while 'egg' not in split_version_info[idx]:
+            idx -= 1
+        version = split_version_info[1:idx]
+        if len(version) > 1:
+            raise RuntimeError("It is not clear why the version string is not "
+                               "a one-element list at this point = %s" % version)
+        version = version[0]
+        return version
+
 
 def version(python_module_path):
-    # try:
-    git_path = find_git_root(python_module_path)
-    version_string = git_describe(git_path)
-    # except NotAGitRepoError:
-    #     logger.info("The module located at %s does not have a git repo in "
-    #                 "its directory hierarchy" % python_module_path)
-    #     raise
+    try:
+        git_path = find_git_root(python_module_path)
+        return git_describe(git_path)
+    except NotAGitRepoError:
+        logger.info("The module located at %s does not have a git repo in "
+                    "its directory hierarchy" % python_module_path)
+        pass
 
-    return version_string
+    return version_in_folder_name(python_module_path)
+
+__version__ = version(__file__)
