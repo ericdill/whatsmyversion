@@ -61,6 +61,10 @@ def git_describe(git_root, version_prefix, version_suffix, use_local_version_id=
 class NotAGitRepoError(RuntimeError):
     pass
 
+class NoVersionInEggInfoError(RuntimeError):
+    pass
+    
+    
 def find_git_root(path):
     """Recursively search up the path hierarchy for the git folder
 
@@ -106,30 +110,38 @@ def version_in_folder_name(path):
         logger.debug('version_info_folder = %s' % version_info_folder)
         split_version_info = version_info_folder.split('-')
         if len(split_version_info) == 1:
+            if version_info_folder.endswith('.py'):
+                version_info_folder = version_info_folder[:-3]
+            logger.debug('version_info_folder = %s' % version_info_folder)
             # there is no relevant metadata in the site-package folder tree
             # though there might be an egg-info file or folder
             site_packages_dir = os.sep + os.path.join(*split_path[:(split_path.index('site-packages')+1)])
             logger.debug('site_packages_dir = %s' % site_packages_dir)
-            # for path in os.listdir(site_packages_dir):
-            #     if version_info_folder in path:
-            #         logger.debug('path matched = %s' % path)
+            for path in os.listdir(site_packages_dir):
+                if version_info_folder in path:
+                    logger.debug('matched path = %s' % path)
             egg_info_path = [path for path in os.listdir(site_packages_dir) if
                         (version_info_folder.lower() in path.lower() and
                          '.egg-info' in path.lower())][0]
             egg_info_path = os.path.join(site_packages_dir, egg_info_path)
-            print("egg_info path = %s" % egg_info_path)
+            logger.debug("egg_info path = %s" % egg_info_path)
             if os.path.isdir(egg_info_path):
                 logger.debug('egg_info_path is a directory. contents = %s' % os.listdir(egg_info_path))
                 egg_info_path = os.path.join(egg_info_path, 'PKG-INFO')
             elif os.path.isfile(egg_info_path):
                 logger.debug('egg_info_path is a file')
             
+            logger.debug('opening file = %s' % egg_info_path)
             # find the version from the egg info
             with open(egg_info_path) as f:
                 lines = f.read().split('\n')
-                version_line = [line for line in lines if line.lower().startswith('version')][0]
-                version = version_line.split(':')[-1].strip()
+                version_line = [line for line in lines if line.lower().startswith('version')]
+                if not version_line:
+                    raise NoVersionInEggInfoError()
+                version_line = version_line[0]
                 logger.debug('version_line = %s' % version_line)
+                print('version_line = %s' % version_line)
+                version = version_line.split(':')[-1].strip()
                 logger.debug('version = %s' % version)
                 return version
         
