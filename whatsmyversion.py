@@ -23,7 +23,7 @@ def git_describe(git_root, version_prefix, version_suffix, use_local_version_id=
                                         cwd=git_root).decode()
     partial_hash = full_hash[:7]
     split_desc = desc.split('-')
-    logger.info('split_desc = %s' % split_desc)
+    logger.info('split_desc = %s', split_desc)
 
     dirty = ''
     # man this is going to be a terrible bug when the first six characters of
@@ -78,7 +78,7 @@ def find_git_root(path):
     str :
         Path to the git folder. Raises exception if no .git folder is found
     """
-    # logger.info('path = %s' % path)
+    # logger.info('path = %s', path)
     if path == os.sep:
         raise NotAGitRepoError()
 
@@ -103,52 +103,55 @@ def version_in_folder_name(path):
     if 'site-packages' in path:
         # this file was installed via python setup.py install. The version is
         # the thing that comes after the 'site-packages' folder
-        logger.debug('path = %s' % path)
+        logger.debug('path = %s', path)
         split_path = path.split(os.sep)
-        logger.debug('split_path = %s' % split_path)
+        logger.debug('split_path = %s', split_path)
         version_info_folder = split_path[split_path.index('site-packages')+1]
-        logger.debug('version_info_folder = %s' % version_info_folder)
+        logger.debug('version_info_folder = %s', version_info_folder)
         split_version_info = version_info_folder.split('-')
         if len(split_version_info) == 1:
             if version_info_folder.endswith('.py'):
                 version_info_folder = version_info_folder[:-3]
-            logger.debug('version_info_folder = %s' % version_info_folder)
+            logger.debug('version_info_folder = %s', version_info_folder)
             # there is no relevant metadata in the site-package folder tree
             # though there might be an egg-info file or folder
             site_packages_dir = os.sep + os.path.join(*split_path[:(split_path.index('site-packages')+1)])
-            logger.debug('site_packages_dir = %s' % site_packages_dir)
-            for path in os.listdir(site_packages_dir):
-                if version_info_folder in path:
-                    logger.debug('matched path = %s' % path)
+            logger.debug('site_packages_dir = %s', site_packages_dir)
+            # for path in os.listdir(site_packages_dir):
+            #     if version_info_folder in path:
+            #         logger.debug('matched path = %s', path)
             egg_info_path = [path for path in os.listdir(site_packages_dir) if
                         (version_info_folder.lower() in path.lower() and
                          '.egg-info' in path.lower())][0]
             egg_info_path = os.path.join(site_packages_dir, egg_info_path)
             logger.debug("egg_info path = %s" % egg_info_path)
             if os.path.isdir(egg_info_path):
-                logger.debug('egg_info_path is a directory. contents = %s' % os.listdir(egg_info_path))
+                logger.debug('egg_info_path is a directory. contents = %s', os.listdir(egg_info_path))
                 egg_info_path = os.path.join(egg_info_path, 'PKG-INFO')
             elif os.path.isfile(egg_info_path):
                 logger.debug('egg_info_path is a file')
             
-            logger.debug('opening file = %s' % egg_info_path)
+            logger.debug('opening file = %s', egg_info_path)
             # find the version from the egg info
             with open(egg_info_path) as f:
-                lines = f.read().split('\n')
-                version_line = [line for line in lines if line.lower().startswith('version')]
-                if not version_line:
-                    raise NoVersionInEggInfoError()
-                version_line = version_line[0]
-                logger.debug('version_line = %s' % version_line)
-                logger.debug('version_line = %s' % version_line)
+                version_line = f.readline()
+                while not version_line.startswith('Version'):
+                    version_line = f.readline()
+                # lines = f.read().split('\n')
+                # version_line = [line for line in lines if line.lower().startswith('version')]
+                # if not version_line:
+                #     raise NoVersionInEggInfoError()
+                # version_line = version_line[0]
+                logger.debug('version_line = %s', version_line)
+                logger.debug('version_line = %s', version_line)
                 version = version_line.split(':')[-1].strip()
-                logger.debug('version = %s' % version)
+                logger.debug('version = %s', version)
                 return version
         
-        logger.debug('split_version_info = %s' % split_version_info)
+        logger.debug('split_version_info = %s', split_version_info)
         return split_version_info[1]
         # package_name = split_version_info[0]
-        # logger.debug('\n\n\npackage_name = %s\n\n\n' % package_name)
+        # logger.debug('\n\n\npackage_name = %s\n\n\n', package_name)
         # idx = len(split_version_info) - 1
         # while 'egg' not in split_version_info[idx]:
         #     idx -= 1
