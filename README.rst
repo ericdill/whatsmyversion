@@ -14,7 +14,7 @@ or single_module_package.py) ::
     __version__ = theversion.version(__file__)
     del theversion
 
-Add the following to your setup.py
+Add the following to your setup.py ::
 
     import package_name
 
@@ -23,7 +23,9 @@ Add the following to your setup.py
         ...
     )
 
-Aaaaand that's it!
+Aaaaand that's it! ::
+
+    python -c "import package_name; print(package_name.__version__)"
 
 Configuring ``theversion``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
