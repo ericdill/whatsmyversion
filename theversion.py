@@ -6,20 +6,44 @@ logger = logging.getLogger(__name__)
 
 git_describe_cmd = ['git', 'describe', '--dirty', '--long', '--always', '--tags']
 
+pep440 = r'[N!]N(.N)*[{a|b|rc}N][.postN][.devN]'
 
-def git_describe(git_root):
-    """Given a path known to contain a .git folder, return a version
 
-    Parameters
-    ----------
-    package_dir : str
-        Absolute path to the root of the package
-    """
-    print('git_root = %s' % git_root)
+
+def git_describe(git_root, version_prefix, version_suffix, use_local_version_id=False):
     desc = subprocess.check_output(git_describe_cmd, cwd=git_root).strip()
     if isinstance(desc, bytes):
         desc = desc.decode('utf8')
-    return desc
+    # get the partial git hash. This will inform us which part of the git describe is
+    # part of the 'local version identifier'
+    full_hash = subprocess.check_output(['git', "rev-parse", "HEAD"],
+                                        cwd=git_root).decode()
+    partial_hash = full_hash[:7]
+    split_desc = desc.split('-')
+    print('split_desc = %s' % split_desc)
+    # find the part of the git describe that is part of the 'local version identifier'
+    idx = len(split_desc)-1
+    while partial_hash not in split_desc[idx]:
+        idx -= 1
+    # format the 'local version identifier'
+    local_id = '+' + '-'.join(split_desc[idx:])
+    # only add a version suffix if there have been commits since the tag
+    suffix = version_suffix + split_desc[idx-1]
+    # format the version prefix
+    prefix = split_desc[idx-2]
+    if not prefix.startswith(version_prefix):
+        prefix = version_prefix + prefix
+
+    # if there have been commits to the repo since the tag, then add the
+    # suffix, otherwise do not
+    if int(split_desc[idx-1]) > 0:
+        version = prefix + suffix
+    else:
+        version = prefix
+    if use_local_version_id:
+        version += local_id
+    return version
+
 
 class NotAGitRepoError(RuntimeError):
     pass
@@ -79,10 +103,29 @@ def version_in_folder_name(path):
         return version
 
 
-def version(python_module_path):
+def version(python_module_path, version_prefix='', version_suffix='.post',
+            use_local_version_id=True):
+    """Generate a version string for the given python module
+
+    Parameters
+    ----------
+    python_module_path : str
+        Path to the python module for which you want a version
+    version_prefix : str, optional
+        The prefix for the entire version string
+    version_suffix : {a, b, rc, .post, .dev}
+        The string to insert between the [major.minor.micro] versions and the
+        number of commits since that release
+    use_local_version_id : bool, optional
+        This will be formatted like this: +[git_hash][-dirty]
+        where git_hash is the first 6 characters of the git hasn
+              dirty is a flag that signifies that the python source has
+              uncommitted information
+    """
     try:
         git_path = find_git_root(python_module_path)
-        return git_describe(git_path)
+        return git_describe(git_path, version_prefix, version_suffix,
+                            use_local_version_id)
     except NotAGitRepoError:
         logger.info("The module located at %s does not have a git repo in "
                     "its directory hierarchy" % python_module_path)
@@ -90,4 +133,9 @@ def version(python_module_path):
 
     return version_in_folder_name(python_module_path)
 
-__version__ = version(__file__)
+version_metadata = {
+    'version_prefix': 'v',
+    'version_suffix': '.post',
+}
+
+__version__ = version(__file__, **version_metadata)
