@@ -46,10 +46,12 @@ Use cases
 
 Working:
 
-1. Determine the version of a git repository
+* Determine the version of a git repository
 
-    1. Installed with ``setup.py develop``
-    1. Installed with ``setup.py install``
+    * Installed with ``setup.py develop``
+
+    * Installed with ``setup.py install``
 
 Not yet working:
-1. Determine the version of source code downloaded from github
+
+- Determine the version of source code downloaded from github
