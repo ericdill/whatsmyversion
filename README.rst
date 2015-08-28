@@ -1,8 +1,8 @@
 ``theversion``
 --------------
 Single module python package to make versioning simple.  You add a couple of
-configuration parameters to your top-most python module and `theversion` will
-determine your git version string
+configuration parameters to your top-most python module and ``theversion`` will
+determine the version string based on your git history.
 
 Using ``theversion``
 ~~~~~~~~~~~~~~~~~~~~
