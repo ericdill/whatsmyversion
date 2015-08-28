@@ -11,11 +11,16 @@ def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
 import whatsmyversion
+git_path = whatsmyversion.find_git_root(os.getcwd())
+__version__ = whatsmyversion.git_describe(git_path, version_prefix='v',
+                                          version_suffix='post',
+                                          use_local_version_id=False)
 
 setup(
     name='whatsmyversion',
-    version=whatsmyversion.__version__,
+    version=__version__,
     author='Eric Dill',
+    author_email='thedizzle@gmail.com',
     description="Making versioning easy",
     long_description=read('README.rst'),
     py_modules=['whatsmyversion'],
