@@ -20,27 +20,33 @@ def git_describe(git_root, version_prefix, version_suffix, use_local_version_id=
     partial_hash = full_hash[:7]
     split_desc = desc.split('-')
     logger.info('split_desc = %s' % split_desc)
-    # find the part of the git describe that is part of the 'local version identifier'
-    idx = len(split_desc)-1
-    while partial_hash not in split_desc[idx]:
-        idx -= 1
-    # format the 'local version identifier'
-    local_id = '+' + '-'.join(split_desc[idx:])
-    # only add a version suffix if there have been commits since the tag
-    suffix = version_suffix + split_desc[idx-1]
-    # format the version prefix
-    prefix = split_desc[idx-2]
+
+    dirty = ''
+    # man this is going to be a terrible bug when the first six characters of
+    # the git hash contain `dirty`
+    if 'dirty' in split_desc[-1]:
+        dirty = split_desc.pop(-1)
+
+    prefix, suffix, local_id = split_desc
+
+    # add the prefix if you didn't tag it like you wanted it
     if not prefix.startswith(version_prefix):
         prefix = version_prefix + prefix
 
     # if there have been commits to the repo since the tag, then add the
     # suffix, otherwise do not
-    if int(split_desc[idx-1]) > 0:
-        version = prefix + suffix
+    if int(suffix) > 0:
+        version = prefix + version_suffix + suffix
     else:
         version = prefix
+    # add the local identifier to the version (the first bit of the git hash)
     if use_local_version_id:
-        version += local_id
+        # PEP440 formatting of the local identifier
+        version += '+' + local_id + '-' + dirty
+    elif dirty:
+        # if you're building from uncommitted repos, shame on you...
+        version += '+' + dirty
+
     return version
 
 
