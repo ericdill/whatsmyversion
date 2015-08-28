@@ -4,10 +4,14 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+loglevel = 'DEBUG'
+handler = logging.StreamHandler()
+logger.setLevel(loglevel)
+handler.setLevel(loglevel)
+logger.addHandler(handler)
+
 git_describe_cmd = ['git', 'describe', '--dirty', '--long', '--always', '--tags']
 
-# need to convert this into a validating regex
-pep440 = r'[N!]N(.N)*[{a|b|rc}N][.postN][.devN]'
 
 def git_describe(git_root, version_prefix, version_suffix, use_local_version_id=False):
     desc = subprocess.check_output(git_describe_cmd, cwd=git_root).strip()
@@ -45,7 +49,11 @@ def git_describe(git_root, version_prefix, version_suffix, use_local_version_id=
         version += '+' + local_id
     if dirty:
         # if you're building from uncommitted repos, shame on you...
-        version += '+' + dirty
+        if not '+' in version:
+            version += '+'
+        else:
+            version += '.'
+        version += dirty
 
     return version
 
@@ -91,24 +99,28 @@ def version_in_folder_name(path):
     if 'site-packages' in path:
         # this file was installed via python setup.py install. The version is
         # the thing that comes after the 'site-packages' folder
+        logger.debug('path = %s' % path)
         split_path = path.split(os.sep)
+        logger.debug('split_path = %s' % split_path)
         version_info_folder = split_path[split_path.index('site-packages')+1]
         logger.debug('version_info_folder = %s' % version_info_folder)
         split_version_info = version_info_folder.split('-')
         logger.debug('split_version_info = %s' % split_version_info)
-        package_name = split_version_info[0]
-        idx = len(split_version_info) - 1
-        while 'egg' not in split_version_info[idx]:
-            idx -= 1
-        version = split_version_info[1:idx]
-        if len(version) > 1:
-            raise RuntimeError("It is not clear why the version string is not "
-                               "a one-element list at this point = %s" % version)
-        version = version[0]
-        version.replace('_', '+')
+        version = split_version_info[1]
+        # package_name = split_version_info[0]
+        # logger.debug('\n\n\npackage_name = %s\n\n\n' % package_name)
+        # idx = len(split_version_info) - 1
+        # while 'egg' not in split_version_info[idx]:
+        #     idx -= 1
+        # version = split_version_info[1:idx]
+        # if len(version) > 1:
+        #     raise RuntimeError("It is not clear why the version string is not "
+        #                        "a one-element list at this point = %s" % version)
+        # version = version[0]
+        # version.replace('_', '+')
         return version
 
-
+    
 def version(python_module_path, version_prefix='', version_suffix='.post',
             use_local_version_id=True):
     """Generate a version string for the given python module
@@ -136,9 +148,9 @@ def version(python_module_path, version_prefix='', version_suffix='.post',
         logger.info("The module located at %s does not have a git repo in "
                     "its directory hierarchy" % python_module_path)
         pass
-
     return version_in_folder_name(python_module_path)
-
+    
+    
 version_metadata = {
     'version_prefix': 'v',
     'version_suffix': '.post',
