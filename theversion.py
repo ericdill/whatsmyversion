@@ -20,7 +20,7 @@ def git_describe(git_root, version_prefix, version_suffix, use_local_version_id=
                                         cwd=git_root).decode()
     partial_hash = full_hash[:7]
     split_desc = desc.split('-')
-    print('split_desc = %s' % split_desc)
+    logger.info('split_desc = %s' % split_desc)
     # find the part of the git describe that is part of the 'local version identifier'
     idx = len(split_desc)-1
     while partial_hash not in split_desc[idx]:
@@ -61,7 +61,7 @@ def find_git_root(path):
     str :
         Path to the git folder. Raises exception if no .git folder is found
     """
-    # print('path = %s' % path)
+    # logger.info('path = %s' % path)
     if path == os.sep:
         raise NotAGitRepoError()
 
