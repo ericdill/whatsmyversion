@@ -140,7 +140,7 @@ def version_in_folder_name(path):
                     raise NoVersionInEggInfoError()
                 version_line = version_line[0]
                 logger.debug('version_line = %s' % version_line)
-                print('version_line = %s' % version_line)
+                logger.debug('version_line = %s' % version_line)
                 version = version_line.split(':')[-1].strip()
                 logger.debug('version = %s' % version)
                 return version
