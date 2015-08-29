@@ -4,7 +4,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-loglevel = 'DEBUG'
+loglevel = 'INFO'
 handler = logging.StreamHandler()
 logger.setLevel(loglevel)
 handler.setLevel(loglevel)
@@ -23,7 +23,7 @@ def git_describe(git_root, version_prefix, version_suffix, use_local_version_id=
                                         cwd=git_root).decode()
     partial_hash = full_hash[:7]
     split_desc = desc.split('-')
-    logger.info('split_desc = %s', split_desc)
+    logger.debug('split_desc = %s', split_desc)
 
     dirty = ''
     # man this is going to be a terrible bug when the first six characters of
@@ -63,8 +63,8 @@ class NotAGitRepoError(RuntimeError):
 
 class NoVersionInEggInfoError(RuntimeError):
     pass
-    
-    
+
+
 def find_git_root(path):
     """Recursively search up the path hierarchy for the git folder
 
@@ -130,7 +130,7 @@ def version_in_folder_name(path):
                 egg_info_path = os.path.join(egg_info_path, 'PKG-INFO')
             elif os.path.isfile(egg_info_path):
                 logger.debug('egg_info_path is a file')
-            
+
             logger.debug('opening file = %s', egg_info_path)
             # find the version from the egg info
             with open(egg_info_path) as f:
@@ -147,7 +147,7 @@ def version_in_folder_name(path):
                 version = version_line.split(':')[-1].strip()
                 logger.debug('version = %s', version)
                 return version
-        
+
         logger.debug('split_version_info = %s', split_version_info)
         return split_version_info[1]
         # package_name = split_version_info[0]
@@ -163,7 +163,7 @@ def version_in_folder_name(path):
         # version.replace('_', '+')
         return version
 
-    
+
 def version(python_module_path, version_prefix='', version_suffix='.post',
             use_local_version_id=True):
     """Generate a version string for the given python module
@@ -188,12 +188,12 @@ def version(python_module_path, version_prefix='', version_suffix='.post',
         return git_describe(git_path, version_prefix, version_suffix,
                             use_local_version_id)
     except NotAGitRepoError:
-        logger.info("The module located at %s does not have a git repo in "
+        logger.debug("The module located at %s does not have a git repo in "
                     "its directory hierarchy" % python_module_path)
         pass
     return version_in_folder_name(python_module_path)
-    
-    
+
+
 version_metadata = {
     'version_prefix': 'v',
     'version_suffix': '.post',
